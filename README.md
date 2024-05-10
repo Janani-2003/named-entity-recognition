@@ -87,8 +87,15 @@ y = sequence.pad_sequences(maxlen=max_len,
                   value=tag2idx["O"])
 X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, random_state=1)
 
+input_word = layers.Input(shape=(max_len,))
+embedding_layer= layers.Embedding(input_dim=num_words,output_dim=50,input_length=max_len)(input_word)
+dropout_layer=layers.SpatialDropout1D(0.1)(embedding_layer)
+bidirectional_lstm=layers.Bidirectional(layers.LSTM(units=100,return_sequences=True,recurrent_dropout=0.1))(dropout_layer)
+output=layers.TimeDistributed(layers.Dense(num_tags,activation="softmax"))(bidirectional_lstm)              
+model = Model(input_word, output)
+
 model.summary()
-# Write your code here
+
 model.compile(optimizer="adam",
               loss="sparse_categorical_crossentropy",
               metrics=["accuracy"])
